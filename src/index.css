@@ -93,10 +93,74 @@
   .content-padding {
     padding: 1rem;
   }
+
+  /* Ensure main content takes full width on small screens */
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  /* Hide desktop sidebar completely on small screens */
+  .sidebar-desktop {
+    display: none !important;
+  }
+
+  /* Ensure mobile sidebar doesn't interfere with layout */
+  .sidebar-mobile {
+    position: fixed !important;
+    z-index: 50 !important;
+  }
 }
 
 @media (min-width: 1024px) {
   .content-padding {
     padding: 1.5rem 2rem;
+  }
+
+  /* On larger screens, ensure proper sidebar spacing without gaps */
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    padding-left: var(--sidebar-width);
+  }
+
+  /* Ensure desktop sidebar is properly positioned */
+  .sidebar-desktop {
+    position: fixed !important;
+    z-index: 10 !important;
+  }
+}
+
+/* Additional responsive fixes for very small screens */
+@media (max-width: 767px) {
+  .content-padding {
+    padding: 0.75rem;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+}
+
+/* Fix for sidebar gap and positioning */
+@media (min-width: 1024px) {
+  /* When sidebar is collapsed, adjust main content */
+  .group-data-[collapsible="offcanvas"] .main-content {
+    padding-left: 0 !important;
+    width: 100% !important;
+  }
+
+  /* When sidebar is icon-only, adjust main content */
+  .group-data-[collapsible="icon"] .main-content {
+    padding-left: var(--sidebar-width-icon);
+    width: 100%;
   }
 }

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
-import { PanelLeftIcon } from "lucide-react";
+import { PanelLeftIcon, XIcon } from "lucide-react";
 
 import { useIsMobile, useIsSmallScreen } from "./use-mobile";
 import { cn } from "./utils";
@@ -33,7 +33,7 @@ const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
 type SidebarContextProps = {
-  state: "expanded" | "collapsed";
+  state: string;
   open: boolean;
   setOpen: (open: boolean) => void;
   openMobile: boolean;
@@ -156,30 +156,55 @@ function Sidebar({
   side?: "left" | "right";
   collapsible?: "offcanvas" | "icon";
 }) {
-  const { isMobile, isSmallScreen, openMobile, setOpenMobile } = useSidebar();
+  const { isMobile, isSmallScreen, openMobile, setOpenMobile, state } =
+    useSidebar();
 
   // For small screens, use mobile behavior
   const shouldUseMobileBehavior = isMobile || isSmallScreen;
 
   if (shouldUseMobileBehavior) {
+    if (!openMobile) return null;
+
     return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile}>
-        <SheetContent
-          side={side}
-          className="w-[var(--sidebar-width-mobile)] border-sidebar-border bg-sidebar p-0"
+      <div className="fixed inset-0 z-50 lg:hidden">
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 bg-black/50"
+          onClick={() => setOpenMobile(false)}
+        />
+
+        {/* Sidebar */}
+        <div
+          className={cn(
+            "fixed inset-y-0 z-50 flex h-full w-[var(--sidebar-width-mobile)] flex-col bg-sidebar border-sidebar-border shadow-lg",
+            side === "left" ? "left-0 border-r" : "right-0 border-l"
+          )}
           style={
             {
               "--sidebar-width-mobile": SIDEBAR_WIDTH_MOBILE,
             } as React.CSSProperties
           }
         >
-          <SheetHeader className="border-sidebar-border border-b p-4">
-            <SheetTitle>Navigation</SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
-          </SheetHeader>
-          <div className="flex h-full w-full flex-col">{children}</div>
-        </SheetContent>
-      </Sheet>
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-sidebar-border p-4">
+            <div>
+              <h2 className="text-lg font-semibold">Navigation</h2>
+              <p className="text-sm text-muted-foreground">
+                Your Career Success Platform
+              </p>
+            </div>
+            <button
+              onClick={() => setOpenMobile(false)}
+              className="rounded-md p-2 hover:bg-sidebar-accent"
+            >
+              <XIcon className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4">{children}</div>
+        </div>
+      </div>
     );
   }
 
@@ -200,17 +225,7 @@ function Sidebar({
         }
       >
         {/* This is what handles the sidebar gap on desktop */}
-        <div
-          data-slot="sidebar-gap"
-          className={cn(
-            "relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
-            "group-data-[collapsible=offcanvas]:w-0",
-            "group-data-[side=right]:rotate-180",
-            variant === "floating" || variant === "inset"
-              ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]"
-              : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)"
-          )}
-        />
+        {/* Removed sidebar gap element to prevent extra spacing */}
         <div
           data-slot="sidebar-container"
           className={cn(
@@ -279,8 +294,8 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
       className={cn(
         "hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] sm:flex",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
-        "[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
-        "hover:group-data-[collapsible=offcanvas]:bg-sidebar group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full",
+        "[[data-side=left][data-state=collapsible]_&]:cursor-e-resize [[data-side=right][data-state=collapsible]_&]:cursor-w-resize",
+        "hover:group-data-[collapsible=offcanvas]:bg-sidebar hover:group-data-[collapsible=offcanvas]:translate-x-0 hover:group-data-[collapsible=offcanvas]:after:left-full",
         "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
         "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
         className
@@ -524,7 +539,7 @@ function SidebarMenuButton({
       <TooltipContent
         side="right"
         align="center"
-        hidden={state !== "collapsed" || isMobile}
+        hidden={state !== "collapsible" || isMobile}
         {...tooltip}
       />
     </Tooltip>
