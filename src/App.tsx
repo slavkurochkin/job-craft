@@ -13,7 +13,6 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger
 } from './components/ui/sidebar';
@@ -27,6 +26,7 @@ import {
   MessageSquare, 
   TrendingUp 
 } from 'lucide-react';
+import { useIsSmallScreen } from './components/ui/use-mobile';
 
 const navigationItems = [
   { id: 'dashboard', label: 'Home', icon: Home },
@@ -41,6 +41,7 @@ const navigationItems = [
 
 export default function App() {
   const [currentView, setCurrentView] = useState('dashboard');
+  const isSmallScreen = useIsSmallScreen();
 
   const renderCurrentView = () => {
     switch (currentView) {
@@ -66,7 +67,7 @@ export default function App() {
   };
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={!isSmallScreen}>
       <div className="min-h-screen flex w-full">
         <Sidebar>
           <SidebarHeader>
@@ -94,15 +95,21 @@ export default function App() {
             </SidebarMenu>
           </SidebarContent>
         </Sidebar>
-        <main className="flex-1">
+        
+        <main className="flex-1 min-w-0 main-content">
+          {/* Mobile/Tablet Header */}
           <div className="flex items-center gap-2 p-4 border-b lg:hidden">
             <SidebarTrigger />
-            <div>
-              <h1 className="text-xl font-semibold text-primary">Job Craft</h1>
-              <p className="text-sm text-muted-foreground">Your Career Success Platform</p>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl font-semibold text-primary truncate">Job Craft</h1>
+              <p className="text-sm text-muted-foreground truncate">Your Career Success Platform</p>
             </div>
           </div>
-          {renderCurrentView()}
+          
+          {/* Main Content with responsive padding */}
+          <div className="content-padding">
+            {renderCurrentView()}
+          </div>
         </main>
       </div>
     </SidebarProvider>
